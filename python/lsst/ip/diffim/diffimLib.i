@@ -66,7 +66,9 @@ namespace boost {
 #include "lsst/afw/math.h"
 #include "lsst/afw/geom.h" 
 #include "lsst/afw/image.h"
+#include "lsst/afw/table/Source.h"
 #include "lsst/afw/cameraGeom.h"
+#include "lsst/meas/algorithms.h"
 
 #include "lsst/ip/diffim.h"
 %}
@@ -96,11 +98,12 @@ namespace boost {
 %shared_ptr(Eigen::VectorXd);
 
 %include "lsst/daf/base/persistenceMacros.i"
-
+%include "lsst/pex/config.h"            // LSST_CONTROL_FIELD.
 %import  "lsst/afw/image/imageLib.i"
 %import  "lsst/afw/math/mathLib.i"
 %import  "lsst/afw/math/objectVectors.i"
 %import  "lsst/afw/detection/detectionLib.i"
+%import  "lsst/meas/algorithms/algorithmsLib.i"
 
 %lsst_exceptions();
 
@@ -232,9 +235,9 @@ def version(HeadURL = r"$HeadURL$"):
 %KernelCandidateDetection(F, float);
 /******************************************************************************/
 
-%{
-#include "lsst/ip/diffim/KernelCandidate.h"
-%}
+//%{
+//#include "lsst/ip/diffim/KernelCandidate.h"
+//%}
 
 %define %IMAGE(PIXTYPE)
 lsst::afw::image::Image<PIXTYPE>
@@ -244,40 +247,54 @@ lsst::afw::image::Image<PIXTYPE>
 %shared_ptr(lsst::ip::diffim::KernelCandidate<TYPE>);
 
 /* Same problem as with meas algorithms makePsfCandidate */
-%inline %{
-namespace lsst { namespace ip { namespace diffim { namespace lsstSwig {
-template <typename PixelT>
-typename KernelCandidate<PixelT>::Ptr
-makeKernelCandidateForSwig(float const xCenter,
-                           float const yCenter, 
-                           boost::shared_ptr<lsst::afw::image::MaskedImage<PixelT> > const& 
-                               templateMaskedImage,
-                           boost::shared_ptr<lsst::afw::image::MaskedImage<PixelT> > const& 
-                               scienceMaskedImage,
-                           lsst::pex::policy::Policy const& policy) {
-    
-    return typename KernelCandidate<PixelT>::Ptr(new KernelCandidate<PixelT>(xCenter, yCenter,
-                                                                             templateMaskedImage,
-                                                                             scienceMaskedImage,
-                                                                             policy));
-}
-}}}}
-%}
+//%inline %{
+//namespace lsst { namespace ip { namespace diffim { namespace lsstSwig {
+//template <typename PixelT>
+//typename KernelCandidate<PixelT>::Ptr
+//makeKernelCandidateForSwig(float const xCenter,
+//                           float const yCenter, 
+//                           boost::shared_ptr<lsst::afw::image::MaskedImage<PixelT> > const& 
+//                               templateMaskedImage,
+//                           boost::shared_ptr<lsst::afw::image::MaskedImage<PixelT> > const& 
+//                               scienceMaskedImage,
+//                           lsst::pex::policy::Policy const& policy) {
+//    
+//    return typename KernelCandidate<PixelT>::Ptr(new KernelCandidate<PixelT>(xCenter, yCenter,
+//                                                                             templateMaskedImage,
+//                                                                             scienceMaskedImage,
+//                                                                             policy));
+//template <typename PixelT>
+//typename KernelCandidate<PixelT>::Ptr
+//makeKernelCandidateForSwig(boost::shared_ptr<lsst::afw::table::SourceRecord> const& source, 
+//                           boost::shared_ptr<lsst::afw::image::MaskedImage<PixelT> > const& 
+//                               templateMaskedImage,
+//                           boost::shared_ptr<lsst::afw::image::MaskedImage<PixelT> > const& 
+//                               scienceMaskedImage,
+//                           lsst::pex::policy::Policy const& policy) {
+//    
+//    return typename KernelCandidate<PixelT>::Ptr(new KernelCandidate<PixelT>(source,
+//                                                                             templateMaskedImage,
+//                                                                             scienceMaskedImage,
+//                                                                             policy));
+//}
+//}}}}
+//%}
 
-%ignore makeKernelCandidate;
+//%ignore makeKernelCandidate;
 %enddef
 
 %define %KernelCandidate(NAME, TYPE)
 %template(KernelCandidate##NAME) lsst::ip::diffim::KernelCandidate<TYPE>;
-%template(makeKernelCandidate) lsst::ip::diffim::lsstSwig::makeKernelCandidateForSwig<TYPE>;
+%template(makeKernelCandidate) lsst::ip::diffim::makeKernelCandidate<TYPE>;
 %inline %{
     lsst::ip::diffim::KernelCandidate<TYPE>::Ptr
         cast_KernelCandidate##NAME(lsst::afw::math::SpatialCellCandidate::Ptr candidate) {
-        return boost::shared_dynamic_cast<lsst::ip::diffim::KernelCandidate<TYPE> >(candidate);
+        return boost::dynamic_pointer_cast<lsst::ip::diffim::KernelCandidate<TYPE> >(candidate);
     }
 %}
 %enddef
 
+%include "lsst/ip/diffim/KernelCandidate.h"
 %KernelCandidatePtr(F, float);
 
 %include "lsst/ip/diffim/KernelCandidate.h"
@@ -292,5 +309,26 @@ makeKernelCandidateForSwig(float const xCenter,
 
 %include "lsst/ip/diffim/BasisLists.h"
 
+/******************************************************************************/
+
+%{
+#include "lsst/ip/diffim/DipoleAlgorithms.h"
+%}
+
+%shared_ptr(lsst::ip::diffim::DipoleCentroidControl)
+%shared_ptr(lsst::ip::diffim::DipoleFluxControl)
+%shared_ptr(lsst::ip::diffim::DipoleCentroidAlgorithm)
+%shared_ptr(lsst::ip::diffim::DipoleCentroidControl)
+%shared_ptr(lsst::ip::diffim::DipoleFluxAlgorithm)
+%shared_ptr(lsst::ip::diffim::DipoleFluxControl)
+%shared_ptr(lsst::ip::diffim::NaiveDipoleCentroidControl)
+%shared_ptr(lsst::ip::diffim::NaiveDipoleFluxControl)
+%shared_ptr(lsst::ip::diffim::PsfDipoleFluxControl)
+
+%include "lsst/ip/diffim/DipoleAlgorithms.h"
+
+/******************************************************************************/
+
 %include "lsst/ip/diffim/detail.i"
 
+/******************************************************************************/
