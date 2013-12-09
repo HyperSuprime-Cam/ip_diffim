@@ -82,15 +82,6 @@ public:
         return boost::static_pointer_cast<DipoleCentroidControl>(_clone());
     }
 
-    PTR(DipoleCentroidAlgorithm) makeAlgorithm(
-        afw::table::Schema & schema,
-        PTR(daf::base::PropertyList) const & metadata = PTR(daf::base::PropertyList)(),
-        meas::algorithms::AlgorithmMap const & others = meas::algorithms::AlgorithmMap()
-    ) const {
-        return boost::static_pointer_cast<DipoleCentroidAlgorithm>(
-            _makeAlgorithm(schema, metadata, others));
-    }
-
 protected:
     explicit DipoleCentroidControl(std::string const & name_, double priority=0.0) :
         AlgorithmControl(name_, priority) {}
@@ -137,15 +128,6 @@ public:
 
     PTR(DipoleFluxControl) clone() const { 
         return boost::static_pointer_cast<DipoleFluxControl>(_clone()); }
-
-    PTR(DipoleFluxAlgorithm) makeAlgorithm(
-        afw::table::Schema & schema,
-        PTR(daf::base::PropertyList) const & metadata = PTR(daf::base::PropertyList)(),
-        meas::algorithms::AlgorithmMap const & others = meas::algorithms::AlgorithmMap()
-    ) const {
-        return boost::static_pointer_cast<DipoleFluxAlgorithm>(
-            _makeAlgorithm(schema, metadata, others));
-    }
 
 protected:
     explicit DipoleFluxControl(std::string const & name_, double priority=2.0) :
