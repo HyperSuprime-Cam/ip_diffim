@@ -180,15 +180,15 @@ void NaiveDipoleCentroid::_apply(
     source.set(getPositiveKeys().flag, true); // say we've failed so that's the result if we throw
     source.set(getNegativeKeys().flag, true); // say we've failed so that's the result if we throw
 
-    afw::detection::Footprint::PeakList const& peaks = source.getFootprint()->getPeaks();
+    afw::detection::PeakCatalog const& peaks = source.getFootprint()->getPeaks();
 
-    naiveCentroid(source, exposure, peaks[0]->getI(), (peaks[0]->getPeakValue() >= 0 ? 
-                                                       getPositiveKeys() : 
-                                                       getNegativeKeys()));
+    naiveCentroid(source, exposure, peaks[0].getI(), (peaks[0].getPeakValue() >= 0 ?
+                                                      getPositiveKeys() :
+                                                      getNegativeKeys()));
     if (peaks.size() > 1) {
-        naiveCentroid(source, exposure, peaks[1]->getI(), (peaks[1]->getPeakValue() >= 0 ? 
-                                                           getPositiveKeys() :
-                                                           getNegativeKeys()));
+        naiveCentroid(source, exposure, peaks[1].getI(), (peaks[1].getPeakValue() >= 0 ?
+                                                          getPositiveKeys() :
+                                                          getNegativeKeys()));
     }
 }
 
@@ -461,8 +461,7 @@ void PsfDipoleFlux::_apply(
         return;
     }
 
-    afw::detection::Footprint::PeakList peakList = 
-        afw::detection::Footprint::PeakList(footprint->getPeaks());
+    afw::detection::PeakCatalog const & peakList = footprint->getPeaks();
 
     if (peakList.size() == 0) {
         throw LSST_EXCEPT(pex::exceptions::RuntimeErrorException,
@@ -476,8 +475,8 @@ void PsfDipoleFlux::_apply(
     // For N>=2, just measure the brightest-positive and brightest-negative
     // peaks.  peakList is automatically ordered by peak flux, with the most
     // positive one (brightest) being first
-    PTR(afw::detection::Peak) positivePeak = peakList.front();
-    PTR(afw::detection::Peak) negativePeak = peakList.back();
+    afw::detection::PeakRecord const & positivePeak = peakList.front();
+    afw::detection::PeakRecord const & negativePeak = peakList.back();
 
     CONST_PTR(afwDet::Psf) psf = exposure.getPsf();
     double fwhm = psf->computeShape().getDeterminantRadius() * 2.3548;
@@ -490,14 +489,14 @@ void PsfDipoleFlux::_apply(
     float offset   = 0.5 * fwhm; // Maximum distance to search on either side of initial centroid
     float stepsize = 2 * offset / nStepsPer;
         
-    for (float dnx = negativePeak->getFx() - offset; 
-         dnx <= negativePeak->getFx() + offset; dnx += stepsize) {
-        for (float dny = negativePeak->getFy() - offset; 
-             dny <= negativePeak->getFy() + offset; dny += stepsize) {
-            for (float dpx = positivePeak->getFx() - offset; 
-                 dpx <= positivePeak->getFx() + offset; dpx += stepsize) {
-                for (float dpy = positivePeak->getFy() - offset; 
-                     dpy <= positivePeak->getFy() + offset; dpy += stepsize) {
+    for (float dnx = negativePeak.getFx() - offset;
+         dnx <= negativePeak.getFx() + offset; dnx += stepsize) {
+        for (float dny = negativePeak.getFy() - offset;
+             dny <= negativePeak.getFy() + offset; dny += stepsize) {
+            for (float dpx = positivePeak.getFx() - offset;
+                 dpx <= positivePeak.getFx() + offset; dpx += stepsize) {
+                for (float dpy = positivePeak.getFy() - offset;
+                     dpy <= positivePeak.getFy() + offset; dpy += stepsize) {
                     std::pair<double,afw::math::LeastSquares> fit = 
                         _linearFit(source, exposure, dnx, dny, dpx, dpy);
                     if (fit.first < minChi2) {
