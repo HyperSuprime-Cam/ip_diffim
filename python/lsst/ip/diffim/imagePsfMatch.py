@@ -69,6 +69,7 @@ class ImagePsfMatchConfig(pexConfig.Config):
                                                    'flux.gaussian', 'skycoord')
         self.selectMeasurement.slots.modelFlux = None
         self.selectMeasurement.slots.apFlux = None
+        self.selectMeasurement.slots.calibFlux = None
 
 class ImagePsfMatchTask(PsfMatch):
     """PSF-match images to reference images
