@@ -51,6 +51,8 @@ class DiffimTestCases(unittest.TestCase):
             self.templateImage  = afwImage.ExposureF(defTemplatePath)
 
             bgConfig = self.subconfig.afwBackgroundConfig
+            bgConfig.useApprox = False
+            bgConfig.binSize = 512
             diffimTools.backgroundSubtract(bgConfig,
                                            [self.templateImage.getMaskedImage(),
                                             self.scienceImage.getMaskedImage()])
