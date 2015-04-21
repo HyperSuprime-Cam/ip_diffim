@@ -32,6 +32,10 @@ class PsfMatchTestCases(unittest.TestCase):
         self.subconfigDF.useRegularization = False
         self.subconfigDFr.useRegularization = True
 
+        self.subconfigAL.afwBackgroundConfig.useApprox = False
+        self.subconfigDF.afwBackgroundConfig.useApprox = False
+        self.subconfigDFr.afwBackgroundConfig.useApprox = False
+
         # variance is a hack
         self.subconfigAL.singleKernelClipping   = False
         self.subconfigAL.spatialKernelClipping  = False
