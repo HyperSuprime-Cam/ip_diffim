@@ -82,6 +82,7 @@ def createDipole(w, h, xc, yc, scaling = 100.0, fracOffset = 1.2):
     exp = afwImage.makeExposure(image)
     exp.setPsf(psf)
     config = measAlg.SourceDetectionConfig()
+    config.returnOriginalFootprints = True
     config.thresholdPolarity = "both"
     config.reEstimateBackground = False
     schema = afwTable.SourceTable.makeMinimalSchema()
