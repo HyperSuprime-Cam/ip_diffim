@@ -19,6 +19,7 @@ Python bindings for lsst::ip::diffim::detail code
 #include "lsst/afw/geom.h" 
 #include "lsst/afw/image.h"
 #include "lsst/afw/cameraGeom.h"
+#include "lsst/afw/geom/polygon.h"
 
 #include "lsst/ip/diffim.h"
 %}
