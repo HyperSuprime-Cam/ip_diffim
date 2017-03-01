@@ -51,8 +51,15 @@ class ModelPsfMatchConfig(pexConfig.Config):
     padPsf = pexConfig.Field(
         dtype=bool,
         doc="Grow PSF dimensions to largest PSF dimension on input exposure; else clip to smallest",
-        default=False,
+        default=True,
     )
+
+    padSciencePsf = pexConfig.Field(
+        dtype=int,
+        doc="Grow PSF dimensions to largest PSF dimension on input exposure; else clip to smallest",
+        default=0,
+    )
+
 
     def setDefaults(self):
         # No sigma clipping
@@ -346,8 +353,9 @@ And finally provide optional debugging display of the Psf-matched (via the Psf m
         if maxKernelSize % 2 == 0:
             maxKernelSize -= 1
         if self.kConfig.kernelSize > maxKernelSize:
-            raise ValueError("Kernel size (%d) too big to match Psfs of size %d; reduce to at least %d" % (
-                self.kConfig.kernelSize, psfWidth, maxKernelSize))
+            pass
+            #raise ValueError("Kernel size (%d) too big to match Psfs of size %d; reduce to at least %d" % (
+            #    self.kConfig.kernelSize, psfWidth, maxKernelSize))
 
         regionSizeX, regionSizeY = scienceBBox.getDimensions()
         scienceX0, scienceY0 = scienceBBox.getMin()
@@ -377,8 +385,8 @@ And finally provide optional debugging display of the Psf-matched (via the Psf m
                 widthList.append(widthS)
                 heightList.append(heightS)
 
-        lenMax = max(max(heightList), max(widthList))
-        lenMin = min(min(heightList), min(widthList))
+        lenMax = max(max(heightList), max(widthList)) + self.config.padSciencePsf
+        lenMin = min(min(heightList), min(widthList)) + self.config.padSciencePsf
 
         lenPsfScience = lenMax if self.config.padPsf else lenMin
         dimenS = afwGeom.Extent2I(lenPsfScience, lenPsfScience)
